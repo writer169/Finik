@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { WeightRecord } from '../types';
-import { Plus, X, Save, Trash2 } from 'lucide-react';
+import { Plus, X, Save } from 'lucide-react';
 
 interface WeightChartProps {
   data: WeightRecord[];
   onAddWeight?: (record: Partial<WeightRecord>) => void;
-  onDeleteWeight?: (id: string) => void;
 }
 
-const WeightChart: React.FC<WeightChartProps> = ({ data, onAddWeight, onDeleteWeight }) => {
+const WeightChart: React.FC<WeightChartProps> = ({ data, onAddWeight }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [newWeight, setNewWeight] = useState('');
   const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
