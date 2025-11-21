@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { CalendarEvent } from '../types';
 import { CalendarCheck, Syringe, Heart, Star, Gift, Plus, Trash2, Edit2 } from 'lucide-react';
 
