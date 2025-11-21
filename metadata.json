@@ -1,0 +1,5 @@
+{
+  "name": "KittenCare Tracker",
+  "description": "A beautiful, data-driven dashboard to track your kitten's age, weight growth, and medical history with AI-powered insights.",
+  "requestFramePermissions": []
+}
