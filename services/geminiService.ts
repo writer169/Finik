@@ -1,13 +1,12 @@
-import { GoogleGenAI } from "@google/genai";
-import { BIRTH_DATE } from "../constants";
 import { CalendarEvent, Note, WeightRecord } from "../types";
+import { BIRTH_DATE } from "../constants";
 
 export const askGeminiVet = async (userQuestion: string, events: CalendarEvent[], notes: Note[], weightHistory: WeightRecord[]): Promise<string> => {
-  if (!process.env.API_KEY) {
-    return "Пожалуйста, настройте API_KEY для использования AI ассистента.";
-  }
+  // Получаем ключ доступа из URL для авторизации запроса к нашему API
+  const urlParams = new URLSearchParams(window.location.search);
+  const accessKey = urlParams.get('key');
 
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  if (!accessKey) return "Ошибка доступа: отсутствует ключ авторизации.";
 
   const sortedWeights = [...weightHistory].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const latestWeight = sortedWeights.length > 0 ? sortedWeights[sortedWeights.length - 1] : null;
@@ -33,13 +32,25 @@ export const askGeminiVet = async (userQuestion: string, events: CalendarEvent[]
   `;
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: context,
+    const response = await fetch(`/api/ai?key=${accessKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: context })
     });
-    return response.text || "Не удалось получить ответ прямо сейчас.";
+
+    if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        console.error("AI API Error:", errData);
+        if (response.status === 500 && errData.error?.includes('Missing API_KEY')) {
+            return "Ошибка сервера: Не настроен API_KEY в переменных окружения Vercel.";
+        }
+        return "Извините, не удалось связаться с ассистентом.";
+    }
+    
+    const data = await response.json();
+    return data.text || "Не удалось получить ответ.";
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    return "Извините, возникла проблема с подключением к AI сервису.";
+    console.error("Network Error:", error);
+    return "Ошибка сети при обращении к AI сервису.";
   }
 };
