@@ -72,12 +72,12 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ events, notes }) => {
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAsk(query)}
                 placeholder="Напр: Нормальный ли вес 2120г?"
-                className="flex-grow px-4 py-2 rounded-xl border border-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-sm"
+                className="flex-grow px-4 py-2 rounded-xl border border-indigo-100 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-sm shadow-sm"
                 />
                 <button
                 onClick={() => handleAsk(query)}
                 disabled={loading || !query}
-                className="bg-indigo-500 hover:bg-indigo-600 text-white p-2 rounded-xl disabled:opacity-50 transition-all"
+                className="bg-indigo-500 hover:bg-indigo-600 text-white p-2 rounded-xl disabled:opacity-50 transition-all shadow-sm"
                 >
                 <Send size={18} />
                 </button>
