@@ -1,4 +1,4 @@
-import { CalendarEvent, Note } from '../types';
+import { CalendarEvent, Note, WeightRecord } from '../types';
 
 const getAuthParam = (key: string) => `?key=${key}`;
 
@@ -57,6 +57,27 @@ export const dataService = {
 
   async deleteNote(key: string, id: string): Promise<void> {
     await fetch(`/api/notes${getAuthParam(key)}&id=${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async getWeights(key: string): Promise<WeightRecord[]> {
+    const res = await fetch(`/api/weight${getAuthParam(key)}`);
+    if (!res.ok) throw new Error('Failed to fetch weights');
+    return res.json();
+  },
+
+  async addWeight(key: string, record: Partial<WeightRecord>): Promise<WeightRecord> {
+    const res = await fetch(`/api/weight${getAuthParam(key)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(record),
+    });
+    return res.json();
+  },
+
+  async deleteWeight(key: string, id: string): Promise<void> {
+    await fetch(`/api/weight${getAuthParam(key)}&id=${id}`, {
       method: 'DELETE',
     });
   },

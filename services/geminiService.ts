@@ -1,15 +1,16 @@
 import { GoogleGenAI } from "@google/genai";
-import { WEIGHT_DATA, BIRTH_DATE } from "../constants";
-import { CalendarEvent, Note } from "../types";
+import { BIRTH_DATE } from "../constants";
+import { CalendarEvent, Note, WeightRecord } from "../types";
 
-export const askGeminiVet = async (userQuestion: string, events: CalendarEvent[], notes: Note[]): Promise<string> => {
+export const askGeminiVet = async (userQuestion: string, events: CalendarEvent[], notes: Note[], weightHistory: WeightRecord[]): Promise<string> => {
   if (!process.env.API_KEY) {
     return "Пожалуйста, настройте API_KEY для использования AI ассистента.";
   }
 
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-  const latestWeight = WEIGHT_DATA[WEIGHT_DATA.length - 1];
+  const sortedWeights = [...weightHistory].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const latestWeight = sortedWeights.length > 0 ? sortedWeights[sortedWeights.length - 1] : null;
   
   const context = `
     Ты дружелюбный и квалифицированный ветеринарный ассистент.
@@ -18,8 +19,8 @@ export const askGeminiVet = async (userQuestion: string, events: CalendarEvent[]
     - Имя: Финик
     - Вид: Кот (Котенок)
     - Дата рождения: ${BIRTH_DATE}
-    - Последний вес: ${latestWeight.weight}г записан ${latestWeight.date}
-    - История веса: ${JSON.stringify(WEIGHT_DATA)}
+    - Последний вес: ${latestWeight ? `${latestWeight.weight}г (${latestWeight.date})` : 'Нет данных'}
+    - История веса: ${JSON.stringify(sortedWeights)}
     - Календарь событий и медкарты: ${JSON.stringify(events)}
     - Заметки владельца: ${JSON.stringify(notes)}
     

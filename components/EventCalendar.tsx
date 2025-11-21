@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CalendarEvent } from '../types';
-import { CalendarCheck, Syringe, Heart, Star, Gift, Plus, Trash2, Edit2 } from 'lucide-react';
+import { CalendarCheck, Syringe, Heart, Star, Gift, Plus, Trash2, Edit2, Pill, ShieldCheck } from 'lucide-react';
 
 interface EventCalendarProps {
   events: CalendarEvent[];
@@ -67,6 +67,8 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ events, onAddEvent, onUpd
       case 'medical': return <Heart size={18} />;
       case 'birthday': return <Gift size={18} />;
       case 'life': return <Star size={18} />;
+      case 'medication': return <Pill size={18} />;
+      case 'deworming': return <ShieldCheck size={18} />;
       default: return <CalendarCheck size={18} />;
     }
   };
@@ -75,6 +77,8 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ events, onAddEvent, onUpd
     if (type === 'vaccine') return isPast ? 'bg-blue-100 text-blue-600' : 'bg-blue-50 text-blue-400 border-blue-200';
     if (type === 'birthday') return 'bg-pink-100 text-pink-600';
     if (type === 'medical') return isPast ? 'bg-red-100 text-red-600' : 'bg-red-50 text-red-400 border-red-200';
+    if (type === 'medication') return 'bg-purple-100 text-purple-600';
+    if (type === 'deworming') return 'bg-green-100 text-green-600';
     return 'bg-amber-100 text-amber-600';
   };
 
@@ -120,6 +124,8 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ events, onAddEvent, onUpd
             >
               <option value="medical">Визит к врачу</option>
               <option value="vaccine">Вакцинация</option>
+              <option value="medication">Прием лекарств</option>
+              <option value="deworming">Дегельминтизация</option>
               <option value="birthday">День рождения</option>
               <option value="life">Событие жизни</option>
               <option value="other">Другое</option>

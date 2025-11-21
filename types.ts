@@ -1,4 +1,5 @@
 export interface WeightRecord {
+  id?: string;
   date: string;
   weight: number; // in grams
 }
@@ -17,7 +18,7 @@ export interface CalendarEvent {
   date: string;
   title: string;
   description?: string;
-  type: 'medical' | 'life' | 'vaccine' | 'birthday' | 'other';
+  type: 'medical' | 'life' | 'vaccine' | 'birthday' | 'medication' | 'deworming' | 'other';
   isCompleted?: boolean;
 }
 

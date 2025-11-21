@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Send, Loader2 } from 'lucide-react';
 import { askGeminiVet } from '../services/geminiService';
-import { CalendarEvent, Note } from '../types';
+import { CalendarEvent, Note, WeightRecord } from '../types';
 
 interface AiAssistantProps {
   events: CalendarEvent[];
   notes: Note[];
+  weightHistory: WeightRecord[];
 }
 
-const AiAssistant: React.FC<AiAssistantProps> = ({ events, notes }) => {
+const AiAssistant: React.FC<AiAssistantProps> = ({ events, notes, weightHistory }) => {
   const [query, setQuery] = useState('');
   const [response, setResponse] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -27,7 +28,7 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ events, notes }) => {
     setLoading(true);
     setResponse(null);
     
-    const result = await askGeminiVet(text, events, notes);
+    const result = await askGeminiVet(text, events, notes, weightHistory);
     
     setResponse(result);
     setLoading(false);

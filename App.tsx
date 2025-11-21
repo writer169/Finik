@@ -4,8 +4,8 @@ import WeightChart from './components/WeightChart';
 import EventCalendar from './components/EventCalendar';
 import NotesSection from './components/NotesSection';
 import AiAssistant from './components/AiAssistant';
-import { BIRTH_DATE, WEIGHT_DATA } from './constants';
-import { CalendarEvent, Note } from './types';
+import { BIRTH_DATE } from './constants';
+import { CalendarEvent, Note, WeightRecord } from './types';
 import { PawPrint, LayoutDashboard, Calendar, StickyNote, Lock } from 'lucide-react';
 import { dataService } from './services/dataService';
 
@@ -18,6 +18,7 @@ const App: React.FC = () => {
   // State for dynamic data
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
+  const [weights, setWeights] = useState<WeightRecord[]>([]);
 
   useEffect(() => {
     // Auth Check
@@ -36,15 +37,16 @@ const App: React.FC = () => {
   const fetchData = async (key: string) => {
     setIsLoading(true);
     try {
-      const [fetchedEvents, fetchedNotes] = await Promise.all([
+      const [fetchedEvents, fetchedNotes, fetchedWeights] = await Promise.all([
         dataService.getEvents(key),
-        dataService.getNotes(key)
+        dataService.getNotes(key),
+        dataService.getWeights(key)
       ]);
       setEvents(fetchedEvents);
       setNotes(fetchedNotes);
+      setWeights(fetchedWeights);
     } catch (err) {
       console.error("Failed to load data", err);
-      // Optional: handle error state
     } finally {
       setIsLoading(false);
     }
@@ -92,6 +94,13 @@ const App: React.FC = () => {
     } catch (e) { console.error(e); }
   };
 
+  const addWeight = async (record: Partial<WeightRecord>) => {
+    try {
+      const created = await dataService.addWeight(authKey, record);
+      setWeights([...weights, created].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+    } catch(e) { console.error(e); }
+  };
+
   if (!authorized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#fdf8f6] p-4">
@@ -117,6 +126,10 @@ const App: React.FC = () => {
         </div>
       );
   }
+
+  const latestWeight = weights.length > 0 ? weights[weights.length-1] : { weight: 0, date: '' };
+  const firstWeight = weights.length > 0 ? weights[0] : { weight: 0, date: '' };
+  const weightGain = latestWeight.weight - firstWeight.weight;
 
   return (
     <div className="min-h-screen bg-[#fdf8f6] text-gray-800 font-sans p-4 md:p-8 pb-20">
@@ -170,15 +183,17 @@ const App: React.FC = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-white p-4 rounded-2xl shadow-sm border border-cat-50 flex flex-col justify-center items-center text-center">
                         <span className="text-cat-400 text-[10px] font-bold uppercase tracking-wider">Текущий Вес</span>
-                        <span className="text-2xl font-bold text-cat-800 mt-1">{WEIGHT_DATA[WEIGHT_DATA.length-1].weight}г</span>
-                        <span className="text-green-500 text-[10px] font-medium mt-1">20 Ноя</span>
+                        <span className="text-2xl font-bold text-cat-800 mt-1">{latestWeight.weight}г</span>
+                        <span className="text-green-500 text-[10px] font-medium mt-1">
+                            {latestWeight.date ? new Date(latestWeight.date).toLocaleDateString('ru-RU', {month:'short', day:'numeric'}) : ''}
+                        </span>
                     </div>
                     <div className="bg-white p-4 rounded-2xl shadow-sm border border-cat-50 flex flex-col justify-center items-center text-center">
                          <span className="text-cat-400 text-[10px] font-bold uppercase tracking-wider">Набор веса</span>
                          <span className="text-2xl font-bold text-cat-800 mt-1">
-                             +{(WEIGHT_DATA[WEIGHT_DATA.length-1].weight - WEIGHT_DATA[0].weight)}г
+                             {weightGain > 0 ? '+' : ''}{weightGain}г
                          </span>
-                         <span className="text-gray-400 text-[10px] mt-1">с 23 Окт</span>
+                         <span className="text-gray-400 text-[10px] mt-1">всего</span>
                     </div>
                   </div>
               </div>
@@ -186,7 +201,7 @@ const App: React.FC = () => {
               {/* Right Column (Chart & AI & Quick Events) */}
               <div className="md:col-span-8 space-y-6">
                   <div className="h-80">
-                      <WeightChart data={WEIGHT_DATA} />
+                      <WeightChart data={weights} onAddWeight={addWeight} />
                   </div>
                   
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -217,7 +232,7 @@ const App: React.FC = () => {
                         </div>
                       </div>
 
-                      <AiAssistant events={events} notes={notes} />
+                      <AiAssistant events={events} notes={notes} weightHistory={weights} />
                   </div>
               </div>
             </div>
@@ -234,7 +249,7 @@ const App: React.FC = () => {
                 />
               </div>
               <div className="md:col-span-1">
-                 <AiAssistant events={events} notes={notes} />
+                 <AiAssistant events={events} notes={notes} weightHistory={weights} />
                  <div className="mt-6 bg-cat-50 rounded-3xl p-6 text-sm text-cat-800">
                     <h4 className="font-bold mb-2">Совет:</h4>
                     Не забывайте отмечать ежегодные прививки и обработку от паразитов. AI помощник использует эти данные для рекомендаций.
